@@ -74,20 +74,19 @@ class PartitionEndpointProvider
     {
         $data = \Aws\load_compiled_json(__DIR__ . '/../data/endpoints.json');
         $prefixData = \Aws\load_compiled_json(__DIR__ . '/../data/endpoints_prefix_history.json');
-
-        $mergedData = self::mergePrefixGroups($data, $prefixData);
+        $mergedData = self::mergePrefixData($data, $prefixData);
 
         return new self($mergedData['partitions']);
     }
 
     /**
-     * Add endpoint data for other prefixes used by a given service
+     * Copy endpoint data for other prefixes used by a given service
      *
      * @param $data
      * @param $prefixData
-     * @return mixed
+     * @return array
      */
-    public static function mergePrefixGroups($data, $prefixData)
+    public static function mergePrefixData($data, $prefixData)
     {
         $prefixGroups = $prefixData['prefix-groups'];
 
