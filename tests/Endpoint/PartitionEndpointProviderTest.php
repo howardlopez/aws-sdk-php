@@ -216,17 +216,39 @@ class PartitionEndpointProviderTest extends TestCase
         $this->assertSame("https://$endpoint", $data['endpoint']);
     }
 
-    /**
-     * @dataProvider  mergePrefixDataProvider
-     *
-     * @param $partitionData
-     * @param $prefixData
-     */
-    public function testCanMergePrefixData($partitionData, $prefixData)
+    public function testCanMergePrefixData()
     {
-        $mergedData = PartitionEndpointProvider::mergePrefixData($partitionData, $prefixData);
+        $prefixData = [
+            "prefix-groups" => [
+                "ec2" => ["ec2_old", "ec2_deprecated"],
+                "s3" => ["s3_old"],
+            ],
+        ];
 
-        foreach ($mergedData["partitions"] as $index => $partition) {
+        $mergedData = PartitionEndpointProvider::mergePrefixData(
+            [
+                "partitions" => [
+                    [
+                        "services" => [
+                            "ec2" => [
+                                "endpoints" => [
+                                    "us-east-1" => []
+                                ]
+                            ],
+                            "s3" => [
+                                "endpoints" => [
+                                    "us-east-1" => [],
+                                    "us-east-2" => []
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            $prefixData
+        );
+
+        foreach ($mergedData["partitions"] as $partition) {
             foreach ($prefixData['prefix-groups'] as $current => $old) {
                 foreach ($old as $prefix) {
                     $this->assertArrayHasKey(
@@ -239,39 +261,6 @@ class PartitionEndpointProviderTest extends TestCase
                 }
             }
         }
-    }
-
-    public function mergePrefixDataProvider()
-    {
-        return [
-            [
-                [
-                    "partitions" => [
-                        [
-                            "services" => [
-                                "ec2" => [
-                                    "endpoints" => [
-                                        "us-east-1" => []
-                                    ]
-                                ],
-                                "s3" => [
-                                    "endpoints" => [
-                                        "us-east-1" => [],
-                                        "us-east-2" => []
-                                    ],
-                                ],
-                            ],
-                        ],
-                    ],
-                ],
-                [
-                    "prefix-groups" => [
-                        "ec2" => ["ec2_old", "ec2_deprecated"],
-                        "s3" => ["s3_old"],
-                    ],
-                ],
-            ],
-        ];
     }
 
     public function knownEndpointProvider()
